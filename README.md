@@ -2,7 +2,7 @@
 
 A lightweight repository manager for composer.
 
-> [!WARNING]
+> [!INFO]
 > For enterprise and medium/large projects, I recommend using [Private Packagist](https://packagist.com/).
 
 ## Tell me more
