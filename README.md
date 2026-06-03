@@ -11,7 +11,8 @@ Pharman is designed to simplify the management of composer repositories, providi
 
 ## For whom?
 
-For developers that need to host a few packages on a private server. 
+- For developers that need to host a few packages on a private server.
+- For offline environments. (You are developing a package during your plane/train trip, and you need to pull cached packages from a local instance of phacman).
 
 
 ## Features
@@ -23,6 +24,7 @@ For developers that need to host a few packages on a private server.
 - Security audit provided by [Packagist API](https://packagist.org/security-advisories/).
 - It can keep copies of packages in a local directory.
 - Slack and email notifications for security alerts.
+- Lightweight, you can host it on a Raspberry Pi or the cheaper Laravel Cloud instance.
 
 
 ## Note
