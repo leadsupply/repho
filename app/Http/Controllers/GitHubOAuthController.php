@@ -51,7 +51,8 @@ class GitHubOAuthController extends Controller
                 ->with('error', 'Failed to obtain token from GitHub.');
         }
 
-        return redirect()->route('credentials.create')
-            ->with('github_token', $token);
+        session()->put('github_token', $token);
+
+        return redirect()->route('credentials.create');
     }
 }

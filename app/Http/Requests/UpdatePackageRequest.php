@@ -26,7 +26,7 @@ class UpdatePackageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'repository_url' => ['required', 'url', 'max:500'],
+            'repository_url' => ['required', 'url', 'max:500', 'regex:#^https?://.+/.+#'],
             'type' => ['required', Rule::enum(PackageType::class)],
             'credential_id' => ['nullable', 'exists:credentials,id'],
             'download_dists' => ['boolean'],

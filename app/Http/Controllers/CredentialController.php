@@ -32,7 +32,7 @@ class CredentialController extends Controller
     public function create(): Response
     {
         return Inertia::render('credentials/create', [
-            'githubToken' => session('github_token'),
+            'githubToken' => session()->pull('github_token'),
             'githubOAuthEnabled' => filled(config('services.github.client_id')),
         ]);
     }

@@ -30,7 +30,9 @@ class AuthenticateRepository
         $username = $request->getUser();
         $password = $request->getPassword();
 
-        if ($username === $repository->auth_username && $password === $repository->auth_password) {
+        if ($username !== null && $password !== null
+            && hash_equals((string) $repository->auth_username, $username)
+            && hash_equals((string) $repository->auth_password, $password)) {
             return $next($request);
         }
 
@@ -43,7 +45,7 @@ class AuthenticateRepository
     {
         $token = $request->bearerToken() ?? $request->query('token');
 
-        if ($token && $token === $repository->auth_token) {
+        if ($token && hash_equals((string) $repository->auth_token, $token)) {
             return $next($request);
         }
 

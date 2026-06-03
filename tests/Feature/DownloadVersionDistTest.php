@@ -246,6 +246,92 @@ class DownloadVersionDistTest extends TestCase
         ]);
     }
 
+    public function test_download_version_returns_zip_when_dist_exists(): void
+    {
+        $user = User::factory()->create();
+        $package = Package::factory()->github()->create(['name' => 'vendor/dlpkg']);
+        $version = Version::factory()->for($package)->create(['reference' => 'dlref123']);
+
+        $cachePath = config('phacman.dist_cache_path').'/vendor/dlpkg/dlref123.zip';
+        $cacheDir = dirname($cachePath);
+        if (! is_dir($cacheDir)) {
+            mkdir($cacheDir, 0755, true);
+        }
+        file_put_contents($cachePath, 'zip-content');
+
+        $response = $this->actingAs($user)
+            ->get(route('packages.versions.download', [$package, $version]));
+
+        $response->assertOk();
+        $response->assertDownload('dlpkg-'.$version->version.'.zip');
+
+        File::delete($cachePath);
+    }
+
+    public function test_download_version_returns_404_when_dist_missing(): void
+    {
+        $user = User::factory()->create();
+        $package = Package::factory()->github()->create(['name' => 'vendor/nopkg']);
+        $version = Version::factory()->for($package)->create(['reference' => 'noref']);
+
+        $response = $this->actingAs($user)
+            ->get(route('packages.versions.download', [$package, $version]));
+
+        $response->assertNotFound();
+    }
+
+    public function test_download_version_returns_404_for_mismatched_package(): void
+    {
+        $user = User::factory()->create();
+        $package1 = Package::factory()->github()->create(['name' => 'vendor/pkg1']);
+        $package2 = Package::factory()->github()->create(['name' => 'vendor/pkg2']);
+        $version = Version::factory()->for($package2)->create();
+
+        $response = $this->actingAs($user)
+            ->get(route('packages.versions.download', [$package1, $version]));
+
+        $response->assertNotFound();
+    }
+
+    public function test_show_page_includes_dist_url_for_cached_versions(): void
+    {
+        $user = User::factory()->create();
+        $package = Package::factory()->github()->create(['name' => 'vendor/showpkg']);
+        $version = Version::factory()->for($package)->create(['reference' => 'showref']);
+
+        $cachePath = config('phacman.dist_cache_path').'/vendor/showpkg/showref.zip';
+        $cacheDir = dirname($cachePath);
+        if (! is_dir($cacheDir)) {
+            mkdir($cacheDir, 0755, true);
+        }
+        file_put_contents($cachePath, 'zip-content');
+
+        $response = $this->actingAs($user)->get(route('packages.show', $package));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('packages/show')
+            ->where('versions.0.dist_url', route('packages.versions.download', [$package, $version]))
+        );
+
+        File::delete($cachePath);
+    }
+
+    public function test_show_page_has_null_dist_url_when_no_cache(): void
+    {
+        $user = User::factory()->create();
+        $package = Package::factory()->github()->create(['name' => 'vendor/nocache']);
+        Version::factory()->for($package)->create(['reference' => 'noref']);
+
+        $response = $this->actingAs($user)->get(route('packages.show', $package));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('packages/show')
+            ->where('versions.0.dist_url', null)
+        );
+    }
+
     public function test_package_defaults_download_dists_to_false(): void
     {
         $user = User::factory()->create();

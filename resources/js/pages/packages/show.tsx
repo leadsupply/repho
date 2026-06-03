@@ -1,5 +1,5 @@
 import { Form, Head, Link, router, usePoll } from '@inertiajs/react';
-import { Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Download, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import Heading from '@/components/heading';
@@ -289,6 +289,9 @@ export default function PackagesShow({
                                         <th className="px-4 py-3 text-left font-medium">
                                             Released
                                         </th>
+                                        <th className="px-4 py-3 text-right font-medium">
+                                            Dist
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -305,6 +308,15 @@ export default function PackagesShow({
                                             </td>
                                             <td className="px-4 py-3 text-muted-foreground">
                                                 {v.released_at ?? '-'}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                {v.dist_url && (
+                                                    <a href={v.dist_url} download>
+                                                        <Button variant="ghost" size="sm">
+                                                            <Download className="size-4" />
+                                                        </Button>
+                                                    </a>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}

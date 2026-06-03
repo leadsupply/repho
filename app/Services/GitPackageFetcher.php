@@ -72,7 +72,7 @@ class GitPackageFetcher implements PackageFetcher
         }
 
         $result = Process::path($repoPath)
-            ->run("git archive --format=zip {$reference}");
+            ->run(['git', 'archive', '--format=zip', '--', $reference]);
 
         if (! $result->successful()) {
             return null;
@@ -106,7 +106,7 @@ class GitPackageFetcher implements PackageFetcher
             mkdir($parentDir, 0755, true);
         }
 
-        $result = Process::run("git clone --bare {$repoUrl} {$repoPath}");
+        $result = Process::run(['git', 'clone', '--bare', '--', $repoUrl, $repoPath]);
 
         if (! $result->successful()) {
             throw new \RuntimeException('Failed to clone: '.$result->errorOutput());
@@ -137,7 +137,7 @@ class GitPackageFetcher implements PackageFetcher
      */
     private function readComposerJson(string $repoPath, string $ref): ?array
     {
-        $result = Process::path($repoPath)->run("git show {$ref}:composer.json");
+        $result = Process::path($repoPath)->run(['git', 'show', $ref.':composer.json']);
 
         if (! $result->successful()) {
             return null;
@@ -150,7 +150,7 @@ class GitPackageFetcher implements PackageFetcher
 
     private function getReference(string $repoPath, string $ref): ?string
     {
-        $result = Process::path($repoPath)->run("git rev-parse {$ref}^{}");
+        $result = Process::path($repoPath)->run(['git', 'rev-parse', $ref.'^{}']);
 
         if (! $result->successful()) {
             return null;
@@ -161,7 +161,7 @@ class GitPackageFetcher implements PackageFetcher
 
     private function getTagDate(string $repoPath, string $tag): ?string
     {
-        $result = Process::path($repoPath)->run("git log -1 --format=%aI {$tag}");
+        $result = Process::path($repoPath)->run(['git', 'log', '-1', '--format=%aI', '--', $tag]);
 
         if (! $result->successful()) {
             return null;

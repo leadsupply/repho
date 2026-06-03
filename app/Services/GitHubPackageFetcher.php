@@ -66,6 +66,10 @@ class GitHubPackageFetcher implements PackageFetcher
         if ($response->redirect()) {
             $redirectUrl = $response->header('Location');
 
+            if (! $this->isAllowedRedirectUrl($redirectUrl)) {
+                return null;
+            }
+
             return Http::withOptions(['sink' => null])->get($redirectUrl)->body();
         }
 
@@ -74,6 +78,29 @@ class GitHubPackageFetcher implements PackageFetcher
         }
 
         return null;
+    }
+
+    private function isAllowedRedirectUrl(?string $url): bool
+    {
+        if ($url === null) {
+            return false;
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+
+        if ($host === null) {
+            return false;
+        }
+
+        $allowedDomains = ['github.com', 'githubusercontent.com', 'objects.githubusercontent.com'];
+
+        foreach ($allowedDomains as $domain) {
+            if ($host === $domain || str_ends_with($host, '.'.$domain)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

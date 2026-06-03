@@ -65,11 +65,15 @@ class Package extends Model
 
     public function vendor(): string
     {
-        return explode('/', $this->name)[0];
+        $vendor = explode('/', $this->name)[0];
+
+        return basename($vendor);
     }
 
     public function shortName(): string
     {
-        return explode('/', $this->name)[1] ?? $this->name;
+        $name = explode('/', $this->name)[1] ?? $this->name;
+
+        return basename($name);
     }
 }

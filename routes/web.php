@@ -13,7 +13,7 @@ Route::redirect('/', '/dashboard')->name('home');
 
 // Composer V2 Repository API (per-repository, with optional auth)
 Route::prefix('repo/{repository:slug}')
-    ->middleware('repo.auth')
+    ->middleware(['repo.auth', 'throttle:120,1'])
     ->group(function () {
         Route::get('packages.json', [ComposerController::class, 'packagesJson'])
             ->name('composer.packages');
@@ -29,22 +29,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('instructions', [InstructionsController::class, 'index'])->name('instructions');
 
-    Route::resource('repositories', RepositoryController::class);
-    Route::post('repositories/{repository}/packages', [RepositoryController::class, 'attachPackage'])
-        ->name('repositories.packages.attach');
-    Route::delete('repositories/{repository}/packages/{package}', [RepositoryController::class, 'detachPackage'])
-        ->name('repositories.packages.detach');
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::resource('repositories', RepositoryController::class);
+        Route::post('repositories/{repository}/packages', [RepositoryController::class, 'attachPackage'])
+            ->name('repositories.packages.attach');
+        Route::delete('repositories/{repository}/packages/{package}', [RepositoryController::class, 'detachPackage'])
+            ->name('repositories.packages.detach');
 
-    Route::resource('credentials', CredentialController::class)->except(['show']);
-    Route::get('github/redirect', [GitHubOAuthController::class, 'redirect'])->name('github.redirect');
-    Route::get('github/callback', [GitHubOAuthController::class, 'callback'])->name('github.callback');
+        Route::resource('credentials', CredentialController::class)->except(['show']);
+        Route::get('github/redirect', [GitHubOAuthController::class, 'redirect'])->name('github.redirect');
+        Route::get('github/callback', [GitHubOAuthController::class, 'callback'])->name('github.callback');
 
-    Route::resource('packages', PackageController::class);
-    Route::post('packages/{package}/sync', [PackageController::class, 'sync'])->name('packages.sync');
-    Route::post('packages/{package}/repositories', [PackageController::class, 'attachRepository'])
-        ->name('packages.repositories.attach');
-    Route::delete('packages/{package}/repositories/{repository}', [PackageController::class, 'detachRepository'])
-        ->name('packages.repositories.detach');
+        Route::resource('packages', PackageController::class);
+        Route::post('packages/{package}/sync', [PackageController::class, 'sync'])->name('packages.sync');
+        Route::post('packages/{package}/repositories', [PackageController::class, 'attachRepository'])
+            ->name('packages.repositories.attach');
+        Route::delete('packages/{package}/repositories/{repository}', [PackageController::class, 'detachRepository'])
+            ->name('packages.repositories.detach');
+        Route::get('packages/{package}/versions/{version}/download', [PackageController::class, 'downloadVersion'])
+            ->name('packages.versions.download');
+    });
 });
 
 require __DIR__.'/settings.php';

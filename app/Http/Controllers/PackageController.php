@@ -9,12 +9,14 @@ use App\Models\Credential;
 use App\Models\DownloadStatistic;
 use App\Models\Package;
 use App\Models\Repository;
+use App\Models\Version;
 use App\Services\SecurityAdvisoryChecker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PackageController extends Controller
 {
@@ -116,13 +118,20 @@ class PackageController extends Controller
             'versions' => $package->versions()
                 ->orderByDesc('released_at')
                 ->get()
-                ->map(fn ($v) => [
-                    'id' => $v->id,
-                    'version' => $v->version,
-                    'version_normalized' => $v->version_normalized,
-                    'reference' => $v->reference,
-                    'released_at' => $v->released_at?->toDateTimeString(),
-                ]),
+                ->map(function ($v) use ($package) {
+                    $distPath = config('phacman.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$v->reference}.zip";
+
+                    return [
+                        'id' => $v->id,
+                        'version' => $v->version,
+                        'version_normalized' => $v->version_normalized,
+                        'reference' => $v->reference,
+                        'released_at' => $v->released_at?->toDateTimeString(),
+                        'dist_url' => file_exists($distPath)
+                            ? route('packages.versions.download', [$package, $v])
+                            : null,
+                    ];
+                }),
             'availableRepositories' => Repository::query()
                 ->whereNotIn('id', $package->repositories->pluck('id'))
                 ->get(['id', 'name', 'slug']),
@@ -201,6 +210,19 @@ class PackageController extends Controller
         $package->repositories()->detach($repository->id);
 
         return redirect()->route('packages.show', $package);
+    }
+
+    public function downloadVersion(Package $package, Version $version): BinaryFileResponse
+    {
+        abort_unless($version->package_id === $package->id, 404);
+
+        $cachePath = config('phacman.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$version->reference}.zip";
+
+        abort_unless(file_exists($cachePath), 404);
+
+        return response()->download($cachePath, "{$package->shortName()}-{$version->version}.zip", [
+            'Content-Type' => 'application/zip',
+        ]);
     }
 
     /**
