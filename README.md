@@ -7,7 +7,7 @@ A lightweight repository manager for composer.
 
 ## Tell me more
 
-Pharman is designed to simplify the management of composer repositories, providing a streamlined way to host and distribute packages. It offers a simple and efficient solution for developers who need to manage small composer repositories without the complexity of full-fledged package managers.
+Phacman is designed to simplify the management of composer repositories, providing a streamlined way to host and distribute packages. It offers a simple and efficient solution for developers who need to manage small composer repositories without the complexity of full-fledged package managers.
 
 ## For whom?
 
