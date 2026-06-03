@@ -4,6 +4,9 @@ on:
   release:
     types: [created]
 
+permissions:
+  contents: write
+
 jobs:
   build:
 
@@ -56,8 +59,6 @@ jobs:
           args: zip -qq -r phacman.zip ${{ github.event.repository.name }}
 
       - name: Upload release
-        uses: JasonEtco/upload-to-release@master
+        uses: softprops/action-gh-release@v2
         with:
-          args: phacman.zip application/zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: phacman.zip
