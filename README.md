@@ -1,4 +1,4 @@
-# Pharman
+# Phacman
 
 A lightweight repository manager for composer.
 

@@ -1,0 +1,74 @@
+name: Build
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, openssl, opcache, zip, libxml, bcmath, bz2, curl, gd, mysql, tidy, redis, soap, grpc, SimpleXML, dom, json, pcntl, zlib
+
+      - uses: actions/checkout@v2
+
+      - name: Setting vars
+        id: vars
+        run: echo ::set-output name=distname::$(echo ${{ github.event.repository.name }}-$(git tag | tail -1).zip)
+
+      - uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest --no-dev --optimize-autoloader
+        env:
+          DEV_HOST: true
+
+      - name: Install JS dependencies and compile assets
+        run: npm install && npm run build
+
+      - name: Remove node_modules folder
+        run: rm -r -f node_modules
+
+      - name: Copying .env file
+        run: cp .env.example .env
+
+      - name: Create APP key
+        run: php artisan key:generate
+
+      - name: Run database migrations
+        run: php artisan migrate --force
+
+      - name: Moving to wrapper directory
+        run: mkdir ../tmp && mv * ../tmp && mkdir ${{ github.event.repository.name }} && mv ../tmp/* ${{ github.event.repository.name }}
+
+      - name: Compressing distribution file
+        uses: montudor/action-zip@v0.1.0
+        with:
+          args: zip -qq -r ${{ steps.vars.outputs.distname }} ${{ github.event.repository.name }}
+
+      - name: Upload release
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: ${{ steps.vars.outputs.distname }} application/zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
