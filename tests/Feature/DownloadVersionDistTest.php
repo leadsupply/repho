@@ -23,7 +23,7 @@ class DownloadVersionDistTest extends TestCase
         $package = Package::factory()->github()->create(['name' => 'vendor/pkg']);
         $version = Version::factory()->for($package)->create(['reference' => 'abc123']);
 
-        $cachePath = config('phacman.dist_cache_path').'/vendor/pkg/abc123.zip';
+        $cachePath = config('repho.dist_cache_path').'/vendor/pkg/abc123.zip';
 
         $this->mock(GitHubPackageFetcher::class, function ($mock) {
             $mock->shouldReceive('getDistArchive')
@@ -46,7 +46,7 @@ class DownloadVersionDistTest extends TestCase
         $package = Package::factory()->github()->create(['name' => 'vendor/pkg']);
         $version = Version::factory()->for($package)->create(['reference' => 'existing123']);
 
-        $cachePath = config('phacman.dist_cache_path').'/vendor/pkg/existing123.zip';
+        $cachePath = config('repho.dist_cache_path').'/vendor/pkg/existing123.zip';
         $cacheDir = dirname($cachePath);
 
         if (! is_dir($cacheDir)) {
@@ -81,7 +81,7 @@ class DownloadVersionDistTest extends TestCase
         $job = new DownloadVersionDist($version);
         $job->handle();
 
-        $cachePath = config('phacman.dist_cache_path').'/vendor/pkg/nullref.zip';
+        $cachePath = config('repho.dist_cache_path').'/vendor/pkg/nullref.zip';
         $this->assertFileDoesNotExist($cachePath);
     }
 
@@ -190,7 +190,7 @@ class DownloadVersionDistTest extends TestCase
         ]);
 
         // Create cached zip for the version that will be removed
-        $cachePath = config('phacman.dist_cache_path').'/vendor/cleanup/old-ref.zip';
+        $cachePath = config('repho.dist_cache_path').'/vendor/cleanup/old-ref.zip';
         $cacheDir = dirname($cachePath);
         if (! is_dir($cacheDir)) {
             mkdir($cacheDir, 0755, true);
@@ -217,7 +217,7 @@ class DownloadVersionDistTest extends TestCase
         $this->assertFileDoesNotExist($cachePath);
 
         // Cleanup
-        $newCachePath = config('phacman.dist_cache_path').'/vendor/cleanup';
+        $newCachePath = config('repho.dist_cache_path').'/vendor/cleanup';
         if (is_dir($newCachePath)) {
             File::deleteDirectory($newCachePath);
         }
@@ -252,7 +252,7 @@ class DownloadVersionDistTest extends TestCase
         $package = Package::factory()->github()->create(['name' => 'vendor/dlpkg']);
         $version = Version::factory()->for($package)->create(['reference' => 'dlref123']);
 
-        $cachePath = config('phacman.dist_cache_path').'/vendor/dlpkg/dlref123.zip';
+        $cachePath = config('repho.dist_cache_path').'/vendor/dlpkg/dlref123.zip';
         $cacheDir = dirname($cachePath);
         if (! is_dir($cacheDir)) {
             mkdir($cacheDir, 0755, true);
@@ -299,7 +299,7 @@ class DownloadVersionDistTest extends TestCase
         $package = Package::factory()->github()->create(['name' => 'vendor/showpkg']);
         $version = Version::factory()->for($package)->create(['reference' => 'showref']);
 
-        $cachePath = config('phacman.dist_cache_path').'/vendor/showpkg/showref.zip';
+        $cachePath = config('repho.dist_cache_path').'/vendor/showpkg/showref.zip';
         $cacheDir = dirname($cachePath);
         if (! is_dir($cacheDir)) {
             mkdir($cacheDir, 0755, true);

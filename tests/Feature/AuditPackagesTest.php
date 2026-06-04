@@ -137,7 +137,7 @@ class AuditPackagesTest extends TestCase
     public function test_audit_sends_mail_notification_when_configured(): void
     {
         Notification::fake();
-        config(['phacman.audit.mail_to' => 'admin@example.com']);
+        config(['repho.audit.mail_to' => 'admin@example.com']);
 
         Package::factory()->create(['name' => 'vendor/vuln-pkg']);
 
@@ -160,7 +160,7 @@ class AuditPackagesTest extends TestCase
     public function test_audit_sends_slack_notification_when_configured(): void
     {
         Notification::fake();
-        config(['phacman.audit.slack_channel' => '#security-alerts']);
+        config(['repho.audit.slack_channel' => '#security-alerts']);
 
         Package::factory()->create(['name' => 'vendor/vuln-pkg']);
 
@@ -184,8 +184,8 @@ class AuditPackagesTest extends TestCase
     {
         Notification::fake();
         config([
-            'phacman.audit.mail_to' => 'admin@example.com',
-            'phacman.audit.slack_channel' => '#security-alerts',
+            'repho.audit.mail_to' => 'admin@example.com',
+            'repho.audit.slack_channel' => '#security-alerts',
         ]);
 
         Package::factory()->create(['name' => 'vendor/vuln-pkg']);
@@ -209,8 +209,8 @@ class AuditPackagesTest extends TestCase
     {
         Notification::fake();
         config([
-            'phacman.audit.mail_to' => null,
-            'phacman.audit.slack_channel' => null,
+            'repho.audit.mail_to' => null,
+            'repho.audit.slack_channel' => null,
         ]);
 
         Package::factory()->create(['name' => 'vendor/vuln-pkg']);
@@ -231,7 +231,7 @@ class AuditPackagesTest extends TestCase
     public function test_audit_does_not_send_notification_when_no_vulnerabilities(): void
     {
         Notification::fake();
-        config(['phacman.audit.mail_to' => 'admin@example.com']);
+        config(['repho.audit.mail_to' => 'admin@example.com']);
 
         Package::factory()->create(['name' => 'vendor/safe-pkg']);
 
@@ -251,7 +251,7 @@ class AuditPackagesTest extends TestCase
     public function test_audit_notification_contains_vulnerability_data(): void
     {
         Notification::fake();
-        config(['phacman.audit.mail_to' => 'admin@example.com']);
+        config(['repho.audit.mail_to' => 'admin@example.com']);
 
         Package::factory()->create(['name' => 'vendor/vuln-pkg']);
 

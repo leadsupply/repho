@@ -23,11 +23,11 @@ class VulnerabilitiesFound extends Notification
     {
         $channels = [];
 
-        if (config('phacman.audit.mail_to')) {
+        if (config('repho.audit.mail_to')) {
             $channels[] = 'mail';
         }
 
-        if (config('phacman.audit.slack_channel')) {
+        if (config('repho.audit.slack_channel')) {
             $channels[] = 'slack';
         }
 

@@ -123,7 +123,7 @@ class PackageSynchronizer
 
     private function downloadVersionDist(Package $package, Version $version, PackageFetcher $fetcher): void
     {
-        $cachePath = config('phacman.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$version->reference}.zip";
+        $cachePath = config('repho.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$version->reference}.zip";
 
         if (file_exists($cachePath)) {
             return;
@@ -148,7 +148,7 @@ class PackageSynchronizer
      */
     private function cleanUpRemovedDists(Package $package, array $removedReferences): void
     {
-        $basePath = config('phacman.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}";
+        $basePath = config('repho.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}";
 
         foreach ($removedReferences as $ref) {
             $path = "{$basePath}/{$ref}.zip";

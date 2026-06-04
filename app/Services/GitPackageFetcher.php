@@ -83,7 +83,7 @@ class GitPackageFetcher implements PackageFetcher
 
     private function getRepoPath(Package $package): string
     {
-        return config('phacman.git_clone_path').'/'.$package->id;
+        return config('repho.git_clone_path').'/'.$package->id;
     }
 
     private function ensureCloned(Package $package): string

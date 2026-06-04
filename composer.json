@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "juanparati/phacman",
+    "name": "juanparati/repho",
     "type": "project",
     "description": "A lightweight repository manager for composer.",
     "keywords": [

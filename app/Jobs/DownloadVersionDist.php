@@ -27,7 +27,7 @@ class DownloadVersionDist implements ShouldQueue
         $package = $this->version->package;
         $ref = $this->version->reference;
 
-        $cachePath = config('phacman.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$ref}.zip";
+        $cachePath = config('repho.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$ref}.zip";
 
         if (file_exists($cachePath)) {
             return;

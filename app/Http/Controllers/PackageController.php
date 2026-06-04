@@ -119,7 +119,7 @@ class PackageController extends Controller
                 ->orderByDesc('released_at')
                 ->get()
                 ->map(function ($v) use ($package) {
-                    $distPath = config('phacman.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$v->reference}.zip";
+                    $distPath = config('repho.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$v->reference}.zip";
 
                     return [
                         'id' => $v->id,
@@ -216,7 +216,7 @@ class PackageController extends Controller
     {
         abort_unless($version->package_id === $package->id, 404);
 
-        $cachePath = config('phacman.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$version->reference}.zip";
+        $cachePath = config('repho.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$version->reference}.zip";
 
         abort_unless(file_exists($cachePath), 404);
 

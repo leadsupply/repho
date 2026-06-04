@@ -56,9 +56,9 @@ jobs:
       - name: Compressing distribution file
         uses: montudor/action-zip@v0.1.0
         with:
-          args: zip -qq -r phacman.zip ${{ github.event.repository.name }}
+          args: zip -qq -r repho.zip ${{ github.event.repository.name }}
 
       - name: Upload release
         uses: softprops/action-gh-release@v2
         with:
-          files: phacman.zip
+          files: repho.zip

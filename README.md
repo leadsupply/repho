@@ -1,4 +1,4 @@
-# Phacman
+# Rephó
 
 A lightweight repository manager for composer.
 
@@ -7,12 +7,12 @@ A lightweight repository manager for composer.
 
 ## Tell me more
 
-Phacman is designed to simplify the management of composer repositories, providing a streamlined way to host and distribute packages. It offers a simple and efficient solution for developers who need to manage small composer repositories without the complexity of full-fledged package managers.
+Repho is designed to simplify the management of composer repositories, providing a streamlined way to host and distribute packages. It offers a simple and efficient solution for developers who need to manage small composer repositories without the complexity of full-fledged package managers.
 
 ## For whom?
 
 - For developers that need to host a few packages on a private server.
-- For offline environments. (You are developing a package during your plane/train trip, and you need to pull cached packages from a local instance of phacman).
+- For offline environments. (You are developing a package during your plane/train trip, and you need to pull cached packages from a local instance of repho).
 
 
 ## Features
@@ -25,6 +25,7 @@ Phacman is designed to simplify the management of composer repositories, providi
 - It can keep copies of packages in a local directory.
 - Slack and email notifications for security alerts.
 - Lightweight, you can host it on a Raspberry Pi or the cheaper Laravel Cloud instance.
+- It may be configured to work without running a queue worker
 
 
 ## Note

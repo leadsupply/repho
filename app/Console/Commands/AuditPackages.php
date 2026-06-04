@@ -112,11 +112,11 @@ class AuditPackages extends Command
     {
         $routes = [];
 
-        if ($mailTo = config('phacman.audit.mail_to')) {
+        if ($mailTo = config('repho.audit.mail_to')) {
             $routes['mail'] = $mailTo;
         }
 
-        if ($slackChannel = config('phacman.audit.slack_channel')) {
+        if ($slackChannel = config('repho.audit.slack_channel')) {
             $routes['slack'] = $slackChannel;
         }
 

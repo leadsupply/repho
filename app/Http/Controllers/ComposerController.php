@@ -56,7 +56,7 @@ class ComposerController extends Controller
         $versionId = $package->versions()->where('reference', $ref)->value('id');
         DownloadStatistic::recordDownload($package->id, $versionId);
 
-        $cachePath = config('phacman.dist_cache_path')."/{$vendor}/{$packageName}/{$ref}.zip";
+        $cachePath = config('repho.dist_cache_path')."/{$vendor}/{$packageName}/{$ref}.zip";
 
         if (file_exists($cachePath)) {
             return response()->download($cachePath, "{$packageName}-{$version}.zip", [
