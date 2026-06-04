@@ -30,7 +30,7 @@ class ResetPackageSync extends Command
                 return self::SUCCESS;
             }
 
-            $package->update(['last_synced_at' => null]);
+            $package->update(['is_syncing' => false]);
             $this->info("Sync flag reset for [{$package->name}].");
 
             return self::SUCCESS;
