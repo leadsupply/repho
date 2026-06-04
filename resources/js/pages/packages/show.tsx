@@ -319,6 +319,9 @@ export default function PackagesShow({
                                         <th className="px-4 py-3 text-left font-medium">
                                             Released
                                         </th>
+                                        <th className="px-4 py-3 text-left font-medium">
+                                            Added at
+                                        </th>
                                         <th className="px-4 py-3 text-right font-medium">
                                             Dist
                                         </th>
@@ -338,6 +341,9 @@ export default function PackagesShow({
                                             </td>
                                             <td className="px-4 py-3 text-muted-foreground">
                                                 {v.released_at ?? '-'}
+                                            </td>
+                                            <td className="px-4 py-3 text-muted-foreground">
+                                                {v.created_at}
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 {v.dist_url && (

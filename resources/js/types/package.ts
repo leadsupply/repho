@@ -19,6 +19,7 @@ export type Version = {
     version_normalized: string;
     reference: string;
     released_at: string | null;
+    created_at: string;
     dist_url: string | null;
 };
 

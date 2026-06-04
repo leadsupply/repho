@@ -116,8 +116,9 @@ class PackageController extends Controller
                 ]),
             ],
             'versions' => $package->versions()
-                ->orderByDesc('released_at')
                 ->get()
+                ->sort(fn ($a, $b) => version_compare($b->version_normalized, $a->version_normalized))
+                ->values()
                 ->map(function ($v) use ($package) {
                     $distPath = config('repho.dist_cache_path')."/{$package->vendor()}/{$package->shortName()}/{$v->reference}.zip";
 
@@ -127,6 +128,7 @@ class PackageController extends Controller
                         'version_normalized' => $v->version_normalized,
                         'reference' => $v->reference,
                         'released_at' => $v->released_at?->toDateTimeString(),
+                        'created_at' => $v->created_at->toDateTimeString(),
                         'dist_url' => file_exists($distPath)
                             ? route('packages.versions.download', [$package, $v])
                             : null,
