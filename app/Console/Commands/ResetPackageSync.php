@@ -36,7 +36,7 @@ class ResetPackageSync extends Command
             return self::SUCCESS;
         }
 
-        $count = Package::whereNotNull('last_synced_at')->count();
+        $count = Package::where('is_syncing', true)->count();
 
         if ($count === 0) {
             $this->info('No synced packages to reset.');
@@ -50,7 +50,7 @@ class ResetPackageSync extends Command
             return self::SUCCESS;
         }
 
-        Package::whereNotNull('last_synced_at')->update(['last_synced_at' => null]);
+        Package::where('is_syncing', true)->update(['is_syncing' => false]);
         $this->info("Sync flag reset for {$count} package(s).");
 
         return self::SUCCESS;
