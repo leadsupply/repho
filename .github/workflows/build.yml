@@ -51,14 +51,24 @@ jobs:
         run: php artisan migrate --force
 
       - name: Moving to wrapper directory
-        run: mkdir ../tmp && mv * ../tmp && mkdir ${{ github.event.repository.name }} && mv ../tmp/* ${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          shopt -s dotglob 
+          mkdir ../tmp 
+          mv * ../tmp 
+          mkdir ${{ github.event.repository.name }} 
+          mv ../tmp/* ${{ github.event.repository.name }}
 
-      - name: Compressing distribution file
+      - name: Compressing distribution file (zip)
         uses: montudor/action-zip@v0.1.0
         with:
           args: zip -qq -r repho.zip ${{ github.event.repository.name }}
+
+      - name: Compressing distribution file (tar.gz)
+        run: tar -czf repho.tar.gz "${{ github.event.repository.name }}"
 
       - name: Upload release
         uses: softprops/action-gh-release@v2
         with:
           files: repho.zip
+          files: repho.tar.gz
