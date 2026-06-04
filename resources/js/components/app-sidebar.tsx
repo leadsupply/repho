@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, KeyRound, LayoutGrid, Package2 } from 'lucide-react';
+import { BookOpen, FolderGit2, KeyRound, LayoutGrid, Package2, Github } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -44,6 +44,12 @@ const footerNavItems: NavItem[] = [
         title: 'Instructions',
         href: '/instructions',
         icon: BookOpen,
+    },
+    {
+        title: 'About...',
+        href: 'https://github.com/juanparati/repho',
+        icon: Github,
+        external: true,
     },
 ];
 

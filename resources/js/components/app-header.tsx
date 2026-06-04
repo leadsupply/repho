@@ -49,14 +49,15 @@ const mainNavItems: NavItem[] = [
 
 const rightNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#react',
         icon: BookOpen,
+    },
+    {
+        title: 'About Pharó',
+        href: 'https://github.com/juanparati/repho',
+        icon: Folder,
+        external: true,
     },
 ];
 
@@ -117,8 +118,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 <a
                                                     key={item.title}
                                                     href={toUrl(item.href)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
+                                                    {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                                                     className="flex items-center space-x-2 font-medium"
                                                 >
                                                     {item.icon && (
@@ -191,8 +191,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         <TooltipTrigger>
                                             <a
                                                 href={toUrl(item.href)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                                {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                                                 className="group inline-flex h-9 w-9 items-center justify-center rounded-md bg-transparent p-0 text-sm font-medium text-accent-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
                                             >
                                                 <span className="sr-only">
