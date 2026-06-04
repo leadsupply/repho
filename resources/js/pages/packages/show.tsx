@@ -4,6 +4,17 @@ import { useEffect, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import Heading from '@/components/heading';
 import SyncOverlay from '@/components/sync-overlay';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -91,16 +102,35 @@ export default function PackagesShow({
                             <RefreshCw className="mr-2 size-4" />
                             Sync
                         </Button>
-                        <Button
-                            variant="destructive"
-                            disabled={pkg.is_syncing}
-                            onClick={() =>
-                                router.delete(`/packages/${pkg.id}`)
-                            }
-                        >
-                            <Trash2 className="mr-2 size-4" />
-                            Delete
-                        </Button>
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button
+                                    variant="destructive"
+                                    disabled={pkg.is_syncing}
+                                >
+                                    <Trash2 className="mr-2 size-4" />
+                                    Delete
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete package</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Are you sure you want to delete <strong>{pkg.name}</strong>? This action cannot be undone and will remove all associated versions and data.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction
+                                        onClick={() =>
+                                            router.delete(`/packages/${pkg.id}`)
+                                        }
+                                    >
+                                        Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </div>
 

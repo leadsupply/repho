@@ -3,6 +3,17 @@ import { Loader2, Package2, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import Heading from '@/components/heading';
 import SyncOverlay from '@/components/sync-overlay';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { Package } from '@/types/package';
@@ -129,18 +140,35 @@ export default function PackagesIndex({ packages }: PageProps) {
                                                 >
                                                     <RefreshCw className="size-3" />
                                                 </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    disabled={pkg.is_syncing}
-                                                    onClick={() =>
-                                                        router.delete(
-                                                            `/packages/${pkg.id}`,
-                                                        )
-                                                    }
-                                                >
-                                                    <Trash2 className="size-3" />
-                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            disabled={pkg.is_syncing}
+                                                        >
+                                                            <Trash2 className="size-3" />
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Delete package</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to delete <strong>{pkg.name}</strong>? This action cannot be undone and will remove all associated versions and data.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() =>
+                                                                    router.delete(`/packages/${pkg.id}`)
+                                                                }
+                                                            >
+                                                                Delete
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
                                             </div>
                                         </td>
                                     </tr>
