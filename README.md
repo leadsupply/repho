@@ -5,9 +5,6 @@ A lightweight repository manager and proxy for composer.
 > [!NOTE]
 > For enterprise and medium/large projects, I recommend using [Private Packagist](https://packagist.com/).
 
-## Tell me more
-
-Repho is designed to simplify the management of composer repositories, providing a streamlined way to host and distribute packages. It offers a simple and efficient solution for developers who need to manage small composer repositories without the complexity of full-fledged package managers.
 
 ## For whom?
 
@@ -28,6 +25,25 @@ Repho is designed to simplify the management of composer repositories, providing
 - Lightweight, you can host it on a Raspberry Pi or the cheaper Laravel Cloud instance.
 - It may be configured to work without running a queue worker
 
+
+## Docker deployment
+
+A dockerfile was provided. If you need to install additional libraries like aws/aws-sdk-php or resend/resend-php for send e-mails. You need to install the dependencies and run:
+
+```sh
+docker build .
+```
+
+then run the container:
+
+```sh
+docker run -p 4431:443 \
+  -p 8081:80 \
+  -e INIT_DEFAULT_EMAIL=admin@example.com \
+  -e INIT_DEFAULT_NAME=admin \
+  -e INIT_DEFAULT_PASSWORD=secretpass123 \
+  [image_id]
+```
 
 ## Notes
 
