@@ -33,6 +33,24 @@ export type Repository = {
     created_at: string;
 };
 
+export type ProxySetting = {
+    enabled: boolean;
+    auth_type: 'none' | 'basic' | 'token';
+    auth_username?: string | null;
+    metadata_cache_ttl: number;
+};
+
+export type ProxyUpstream = {
+    id: number;
+    enabled: boolean;
+    name: string;
+    upstream_url: string;
+    auth_type: 'none' | 'basic' | 'token';
+    auth_username?: string | null;
+    sort_order: number;
+    created_at: string;
+};
+
 export type Credential = {
     id: number;
     name: string;

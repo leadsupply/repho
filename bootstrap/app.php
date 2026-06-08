@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AuthenticateProxy;
 use App\Http\Middleware\AuthenticateRepository;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'repo.auth' => AuthenticateRepository::class,
+            'proxy.auth' => AuthenticateProxy::class,
         ]);
 
         $middleware->web(append: [

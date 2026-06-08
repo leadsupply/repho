@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, KeyRound, LayoutGrid, Package2, Github } from 'lucide-react';
+import { BookOpen, FolderGit2, Globe, KeyRound, LayoutGrid, Package2, Github } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -36,6 +36,11 @@ const mainNavItems: NavItem[] = [
         title: 'Credentials',
         href: '/credentials',
         icon: KeyRound,
+    },
+    {
+        title: 'Proxy',
+        href: '/proxy',
+        icon: Globe,
     },
 ];
 
