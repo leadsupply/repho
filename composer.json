@@ -12,6 +12,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "aws/aws-sdk-php": "^3.300",
         "composer/metadata-minifier": "^1.0",
         "composer/semver": "^3.4",
         "inertiajs/inertia-laravel": "^3.0",
@@ -81,8 +82,7 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php artisan boost:update --ansi"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
