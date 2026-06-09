@@ -27,7 +27,7 @@ class ComposerApiTest extends TestCase
         $response->assertOk()
             ->assertJsonStructure(['metadata-url', 'available-packages'])
             ->assertJson([
-                'metadata-url' => "/repo/{$this->repository->slug}/p2/%package%.json",
+                'metadata-url' => url("/repo/{$this->repository->slug}/p2/%package%.json"),
                 'available-packages' => [],
             ]);
     }

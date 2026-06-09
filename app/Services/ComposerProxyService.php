@@ -54,7 +54,7 @@ class ComposerProxyService
         }
 
         return [
-            'metadata-url' => '/proxy/p2/%package%.json',
+            'metadata-url' => url('/proxy/p2/%package%.json'),
             'available-packages' => array_values(array_unique($allPackages)),
         ];
     }
@@ -192,7 +192,7 @@ class ComposerProxyService
 
                 if (isset($version['dist']['url']) && is_string($version['dist']['url'])) {
                     $encoded = base64_encode($version['dist']['url']);
-                    $version['dist']['url'] = '/proxy/dists/'.rtrim($encoded, '=');
+                    $version['dist']['url'] = url('/proxy/dists/'.rtrim($encoded, '='));
                 }
             }
         }

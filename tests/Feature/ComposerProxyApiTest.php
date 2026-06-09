@@ -37,7 +37,7 @@ class ComposerProxyApiTest extends TestCase
 
         $response->assertOk()
             ->assertJson([
-                'metadata-url' => '/proxy/p2/%package%.json',
+                'metadata-url' => url('/proxy/p2/%package%.json'),
                 'available-packages' => ['monolog/monolog'],
             ]);
     }
@@ -182,7 +182,7 @@ class ComposerProxyApiTest extends TestCase
         $response->assertOk();
 
         $distUrl = $response->json('packages.monolog/monolog.0.dist.url');
-        $this->assertStringStartsWith('/proxy/dists/', $distUrl);
+        $this->assertStringStartsWith(url('/proxy/dists/'), $distUrl);
     }
 
     public function test_proxy_package_metadata_returns_404_when_no_upstream_has_it(): void

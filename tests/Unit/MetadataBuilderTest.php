@@ -30,7 +30,7 @@ class MetadataBuilderTest extends TestCase
 
         $this->assertArrayHasKey('metadata-url', $result);
         $this->assertArrayHasKey('available-packages', $result);
-        $this->assertEquals('/repo/test-repo/p2/%package%.json', $result['metadata-url']);
+        $this->assertEquals(url('/repo/test-repo/p2/%package%.json'), $result['metadata-url']);
         $this->assertIsArray($result['available-packages']);
     }
 

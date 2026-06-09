@@ -9,7 +9,7 @@ A lightweight repository manager and proxy for composer.
 ## For whom?
 
 - For developers that need to host a few packages on a private server.
-- For offline environments. (You are developing a package during your plane/train trip, and you need to pull cached packages from cached by the proxy or from a local repository).
+- For offline environments. (You are developing a project during your plane/train trip, and you need to pull cached packages).
 
 
 ## Features

@@ -15,7 +15,7 @@ class MetadataBuilder
     public function buildPackagesJson(Repository $repository): array
     {
         return [
-            'metadata-url' => "/repo/{$repository->slug}/p2/%package%.json",
+            'metadata-url' => url("/repo/{$repository->slug}/p2/%package%.json"),
             'available-packages' => $repository->packages()
                 ->whereNotNull('last_synced_at')
                 ->pluck('name')
