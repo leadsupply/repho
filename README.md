@@ -48,6 +48,3 @@ docker run -p 4431:443 \
   repho:latest
 ```
 
-## Notes
-
-💣 This project is under development and mostly code was generated with Claude code, so it's not perfect, and it has a lot of bugs. Do not use on production environments.

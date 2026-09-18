@@ -4,8 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Package;
 use App\Models\Repository;
+use App\Models\SecurityAdvisory;
+use App\Services\GitHubPackageFetcher;
 use App\Services\PackageSynchronizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class SyncPackagesCommandTest extends TestCase
@@ -111,5 +114,41 @@ class SyncPackagesCommandTest extends TestCase
 
         $package = Package::where('name', 'vendor/custom-pkg')->first();
         $this->assertTrue($repo->packages()->where('packages.id', $package->id)->exists());
+    }
+
+    public function test_sync_preserves_advisories_when_packagist_api_fails(): void
+    {
+        $package = Package::factory()->create(['name' => 'vendor/test']);
+        SecurityAdvisory::factory()->create(['package_id' => $package->id]);
+
+        $this->mock(GitHubPackageFetcher::class, function ($mock) {
+            $mock->shouldReceive('fetchVersions')->once()->andReturn([]);
+        });
+
+        Http::fake([
+            'packagist.org/api/security-advisories/*' => Http::response(null, 500),
+        ]);
+
+        app(PackageSynchronizer::class)->sync($package);
+
+        $this->assertDatabaseCount('security_advisories', 1);
+    }
+
+    public function test_sync_removes_stale_advisories_when_api_reports_none(): void
+    {
+        $package = Package::factory()->create(['name' => 'vendor/test']);
+        SecurityAdvisory::factory()->create(['package_id' => $package->id]);
+
+        $this->mock(GitHubPackageFetcher::class, function ($mock) {
+            $mock->shouldReceive('fetchVersions')->once()->andReturn([]);
+        });
+
+        Http::fake([
+            'packagist.org/api/security-advisories/*' => Http::response(['advisories' => []]),
+        ]);
+
+        app(PackageSynchronizer::class)->sync($package);
+
+        $this->assertDatabaseCount('security_advisories', 0);
     }
 }

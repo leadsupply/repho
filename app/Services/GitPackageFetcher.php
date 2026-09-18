@@ -89,10 +89,13 @@ class GitPackageFetcher implements PackageFetcher
     private function ensureCloned(Package $package): string
     {
         $repoPath = $this->getRepoPath($package);
-        $repoUrl = $this->buildAuthenticatedUrl($package);
 
         if (is_dir($repoPath)) {
-            $result = Process::path($repoPath)->run('git fetch --tags --prune');
+            // Heal clones created before credentials were passed per invocation:
+            // they carry the token embedded in the persisted remote URL.
+            Process::path($repoPath)->run(['git', 'remote', 'set-url', 'origin', $package->repository_url]);
+
+            $result = Process::path($repoPath)->run($this->gitCommand($package, ['fetch', '--tags', '--prune']));
 
             if (! $result->successful()) {
                 throw new \RuntimeException('Failed to fetch: '.$result->errorOutput());
@@ -106,7 +109,7 @@ class GitPackageFetcher implements PackageFetcher
             mkdir($parentDir, 0755, true);
         }
 
-        $result = Process::run(['git', 'clone', '--bare', '--', $repoUrl, $repoPath]);
+        $result = Process::run($this->gitCommand($package, ['clone', '--bare', '--', $package->repository_url, $repoPath]));
 
         if (! $result->successful()) {
             throw new \RuntimeException('Failed to clone: '.$result->errorOutput());
@@ -115,21 +118,24 @@ class GitPackageFetcher implements PackageFetcher
         return $repoPath;
     }
 
-    private function buildAuthenticatedUrl(Package $package): string
+    /**
+     * Build a git command that supplies the package's credential per
+     * invocation, so the current token is always used and never written
+     * to the clone's config on disk.
+     *
+     * @param  list<string>  $args
+     * @return list<string>
+     */
+    private function gitCommand(Package $package, array $args): array
     {
-        $url = $package->repository_url;
+        $command = ['git'];
 
         if ($package->credential?->token) {
-            $parsed = parse_url($url);
-            $scheme = $parsed['scheme'] ?? 'https';
-            $host = $parsed['host'] ?? '';
-            $path = $parsed['path'] ?? '';
-            $port = isset($parsed['port']) ? ':'.$parsed['port'] : '';
-
-            return "{$scheme}://oauth2:{$package->credential->token}@{$host}{$port}{$path}";
+            $command[] = '-c';
+            $command[] = 'http.extraHeader=Authorization: Basic '.base64_encode("oauth2:{$package->credential->token}");
         }
 
-        return $url;
+        return array_merge($command, $args);
     }
 
     /**

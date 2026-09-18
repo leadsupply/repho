@@ -37,9 +37,10 @@ Route::prefix('proxy')
         Route::get('p2/{vendor}/{package}.json', [ComposerProxyController::class, 'packageMetadata'])
             ->name('proxy.metadata')
             ->where('package', '[a-z0-9\-_.~]+');
-        Route::get('dists/{encodedUrl}', [ComposerProxyController::class, 'dist'])
+        Route::get('dists/{encodedUrl}/{signature}', [ComposerProxyController::class, 'dist'])
             ->name('proxy.dist')
-            ->where('encodedUrl', '.+');
+            ->where('encodedUrl', '[A-Za-z0-9_\-]+')
+            ->where('signature', '[a-f0-9]{64}');
     });
 
 Route::middleware(['auth', 'verified'])->group(function () {

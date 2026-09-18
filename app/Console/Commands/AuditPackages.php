@@ -48,25 +48,34 @@ class AuditPackages extends Command
         }
 
         $totalAdvisories = 0;
+        $failedChecks = 0;
 
         foreach ($packages as $package) {
             $count = $this->auditPackage($checker, $package, showSuccessMessage: false);
 
             if ($count === -1) {
-                return self::FAILURE;
+                $failedChecks++;
+
+                continue;
             }
 
             $totalAdvisories += $count;
         }
 
-        if ($totalAdvisories === 0) {
+        if ($totalAdvisories === 0 && $failedChecks === 0) {
             $this->info('No vulnerabilities found in any package.');
-        } else {
+        }
+
+        if ($totalAdvisories > 0) {
             $this->warn("{$totalAdvisories} vulnerability(ies) found across all packages.");
             $this->sendNotification();
         }
 
-        return $totalAdvisories > 0 ? self::FAILURE : self::SUCCESS;
+        if ($failedChecks > 0) {
+            $this->warn("{$failedChecks} package(s) could not be checked.");
+        }
+
+        return $totalAdvisories > 0 || $failedChecks > 0 ? self::FAILURE : self::SUCCESS;
     }
 
     /**

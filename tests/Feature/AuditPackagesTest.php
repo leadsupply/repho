@@ -118,6 +118,49 @@ class AuditPackagesTest extends TestCase
             ->assertExitCode(1);
     }
 
+    public function test_audit_all_packages_continues_after_failed_check_and_still_notifies(): void
+    {
+        Notification::fake();
+        config(['repho.audit.mail_to' => 'admin@example.com']);
+
+        Package::factory()->create(['name' => 'vendor/pkg-a']);
+        Package::factory()->create(['name' => 'vendor/pkg-b']);
+
+        $this->mock(SecurityAdvisoryChecker::class, function ($mock) {
+            $mock->shouldReceive('check')
+                ->with('vendor/pkg-a')
+                ->once()
+                ->andThrow(new \RuntimeException('Connection timeout'));
+            $mock->shouldReceive('check')
+                ->with('vendor/pkg-b')
+                ->once()
+                ->andReturn([$this->sampleAdvisory]);
+        });
+
+        $this->artisan('package:audit')
+            ->expectsOutput('Failed to check vendor/pkg-a: Connection timeout')
+            ->expectsOutput('1 package(s) could not be checked.')
+            ->assertExitCode(1);
+
+        Notification::assertSentOnDemand(VulnerabilitiesFound::class);
+    }
+
+    public function test_audit_all_packages_fails_without_false_all_clear_when_checks_fail(): void
+    {
+        Package::factory()->create(['name' => 'vendor/pkg-a']);
+
+        $this->mock(SecurityAdvisoryChecker::class, function ($mock) {
+            $mock->shouldReceive('check')
+                ->with('vendor/pkg-a')
+                ->once()
+                ->andThrow(new \RuntimeException('API down'));
+        });
+
+        $this->artisan('package:audit')
+            ->doesntExpectOutput('No vulnerabilities found in any package.')
+            ->assertExitCode(1);
+    }
+
     public function test_audit_command_handles_checker_exception(): void
     {
         Package::factory()->create(['name' => 'vendor/fail-pkg']);
