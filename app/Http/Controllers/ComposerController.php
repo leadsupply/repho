@@ -54,6 +54,11 @@ class ComposerController extends Controller
         }
 
         $versionId = $package->versions()->where('reference', $ref)->value('id');
+
+        if ($versionId === null) {
+            abort(Response::HTTP_NOT_FOUND);
+        }
+
         DownloadStatistic::recordDownload($package->id, $versionId);
 
         $cachePath = config('repho.dist_cache_path')."/{$vendor}/{$packageName}/{$ref}.zip";

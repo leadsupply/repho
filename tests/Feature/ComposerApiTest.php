@@ -118,6 +118,24 @@ class ComposerApiTest extends TestCase
         $response->assertNotFound();
     }
 
+    public function test_dist_returns_404_for_reference_without_published_version(): void
+    {
+        $package = Package::factory()->synced()->create(['name' => 'vendor/test-lib']);
+        $this->repository->packages()->attach($package->id);
+
+        Version::factory()->create([
+            'package_id' => $package->id,
+            'version' => '1.0.0',
+            'version_normalized' => '1.0.0.0',
+            'reference' => 'abc123def456',
+        ]);
+
+        $response = $this->get("/repo/{$this->repository->slug}/dists/vendor/test-lib/1.0.0/0123456789abcdef.zip");
+
+        $response->assertNotFound();
+        $this->assertDatabaseCount('download_statistics', 0);
+    }
+
     public function test_public_repo_requires_no_auth(): void
     {
         $response = $this->getJson("/repo/{$this->repository->slug}/packages.json");

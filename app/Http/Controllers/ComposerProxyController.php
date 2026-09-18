@@ -39,9 +39,9 @@ class ComposerProxyController extends Controller
         return response()->json($data);
     }
 
-    public function dist(string $encodedUrl): BinaryFileResponse
+    public function dist(string $encodedUrl, string $signature): BinaryFileResponse
     {
-        $path = $this->proxyService->getDistFile($encodedUrl);
+        $path = $this->proxyService->getDistFile($encodedUrl, $signature);
 
         if ($path === null) {
             abort(Response::HTTP_NOT_FOUND);

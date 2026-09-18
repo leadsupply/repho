@@ -183,6 +183,7 @@ class ComposerProxyApiTest extends TestCase
 
         $distUrl = $response->json('packages.monolog/monolog.0.dist.url');
         $this->assertStringStartsWith(url('/proxy/dists/'), $distUrl);
+        $this->assertMatchesRegularExpression('#/proxy/dists/[A-Za-z0-9_\-]+/[a-f0-9]{64}$#', $distUrl);
     }
 
     public function test_proxy_package_metadata_returns_404_when_no_upstream_has_it(): void
@@ -208,13 +209,14 @@ class ComposerProxyApiTest extends TestCase
 
         $fakeZip = 'PK-fake-zip-content';
         $originalUrl = 'https://api.github.com/repos/Seldaek/monolog/zipball/abc123';
-        $encoded = rtrim(base64_encode($originalUrl), '=');
+        $encoded = $this->encodeDistUrl($originalUrl);
+        $signature = $this->signDistUrl($encoded);
 
         Http::fake([
             'api.github.com/*' => Http::response($fakeZip),
         ]);
 
-        $response = $this->get("/proxy/dists/{$encoded}");
+        $response = $this->get("/proxy/dists/{$encoded}/{$signature}");
 
         $response->assertOk()
             ->assertHeader('Content-Type', 'application/zip');
@@ -224,9 +226,46 @@ class ComposerProxyApiTest extends TestCase
             'api.github.com/*' => Http::response('should-not-reach', 500),
         ]);
 
-        $response = $this->get("/proxy/dists/{$encoded}");
+        $response = $this->get("/proxy/dists/{$encoded}/{$signature}");
 
         $response->assertOk();
+    }
+
+    public function test_proxy_dist_rejects_unsigned_request(): void
+    {
+        ProxySetting::factory()->enabled()->create();
+
+        Http::fake();
+
+        $encoded = $this->encodeDistUrl('http://169.254.169.254/latest/meta-data/');
+
+        $this->get("/proxy/dists/{$encoded}")->assertNotFound();
+
+        Http::assertNothingSent();
+    }
+
+    public function test_proxy_dist_rejects_forged_signature(): void
+    {
+        ProxySetting::factory()->enabled()->create();
+
+        Http::fake();
+
+        $encoded = $this->encodeDistUrl('http://169.254.169.254/latest/meta-data/');
+        $forgedSignature = str_repeat('a', 64);
+
+        $this->get("/proxy/dists/{$encoded}/{$forgedSignature}")->assertNotFound();
+
+        Http::assertNothingSent();
+    }
+
+    private function encodeDistUrl(string $url): string
+    {
+        return rtrim(strtr(base64_encode($url), '+/', '-_'), '=');
+    }
+
+    private function signDistUrl(string $encoded): string
+    {
+        return hash_hmac('sha256', $encoded, (string) config('app.key'));
     }
 
     public function test_proxy_serves_cached_metadata_when_offline(): void

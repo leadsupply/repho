@@ -82,11 +82,15 @@ class ComposerProxyService
         return null;
     }
 
-    public function getDistFile(string $encodedUrl): ?string
+    public function getDistFile(string $encodedUrl, string $signature): ?string
     {
-        $originalUrl = base64_decode($encodedUrl, true);
+        if (! hash_equals($this->signDistUrl($encodedUrl), $signature)) {
+            return null;
+        }
 
-        if ($originalUrl === false || ! filter_var($originalUrl, FILTER_VALIDATE_URL)) {
+        $originalUrl = base64_decode(strtr($encodedUrl, '-_', '+/'), true);
+
+        if ($originalUrl === false || ! in_array(parse_url($originalUrl, PHP_URL_SCHEME), ['http', 'https'], true)) {
             return null;
         }
 
@@ -191,11 +195,20 @@ class ComposerProxyService
                 }
 
                 if (isset($version['dist']['url']) && is_string($version['dist']['url'])) {
-                    $encoded = base64_encode($version['dist']['url']);
-                    $version['dist']['url'] = url('/proxy/dists/'.rtrim($encoded, '='));
+                    $encoded = rtrim(strtr(base64_encode($version['dist']['url']), '+/', '-_'), '=');
+                    $version['dist']['url'] = url('/proxy/dists/'.$encoded.'/'.$this->signDistUrl($encoded));
                 }
             }
         }
+    }
+
+    /**
+     * Sign an encoded dist URL so getDistFile only fetches URLs this
+     * service issued in rewriteDistUrls, never arbitrary caller input.
+     */
+    private function signDistUrl(string $encodedUrl): string
+    {
+        return hash_hmac('sha256', $encodedUrl, (string) config('app.key'));
     }
 
     private function isCacheExpired(string $cachePath): bool

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Services\SecurityAdvisoryChecker;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -51,16 +52,17 @@ class SecurityAdvisoryCheckerTest extends TestCase
         $this->assertEmpty($advisories);
     }
 
-    public function test_returns_empty_array_when_api_fails(): void
+    public function test_throws_when_api_fails(): void
     {
         Http::fake([
             'packagist.org/api/security-advisories/*' => Http::response(null, 500),
         ]);
 
         $checker = new SecurityAdvisoryChecker;
-        $advisories = $checker->check('vendor/package');
 
-        $this->assertEmpty($advisories);
+        $this->expectException(RequestException::class);
+
+        $checker->check('vendor/package');
     }
 
     public function test_returns_empty_array_when_package_not_in_response(): void
