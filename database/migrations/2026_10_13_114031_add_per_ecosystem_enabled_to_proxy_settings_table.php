@@ -8,10 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('proxy_settings', function (Blueprint $table) {
-            $table->renameColumn('enabled', 'composer_enabled');
-            $table->boolean('npm_enabled')->default(false)->after('enabled');
-        });
+        if (Schema::hasColumn('proxy_settings', 'enabled')) {
+            Schema::table('proxy_settings', function (Blueprint $table) {
+                $table->renameColumn('enabled', 'composer_enabled');
+            });
+        }
+
+        if (! Schema::hasColumn('proxy_settings', 'npm_enabled')) {
+            Schema::table('proxy_settings', function (Blueprint $table) {
+                $table->boolean('npm_enabled')->default(false)->after('composer_enabled');
+            });
+        }
     }
 
     public function down(): void
