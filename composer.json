@@ -11,7 +11,8 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
+        "ext-zip": "*",
         "composer/metadata-minifier": "^1.0",
         "composer/semver": "^3.4",
         "inertiajs/inertia-laravel": "^3.0",

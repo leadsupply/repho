@@ -2,22 +2,20 @@
 
 namespace App\Services;
 
+use App\Concerns\NormalizesTagVersions;
 use App\Models\Package;
-use Composer\Semver\VersionParser;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Str;
 
 class GitPackageFetcher implements PackageFetcher
 {
-    private VersionParser $versionParser;
-
-    public function __construct()
-    {
-        $this->versionParser = new VersionParser;
-    }
+    use NormalizesTagVersions;
 
     public function fetchVersions(Package $package): array
     {
         $repoPath = $this->ensureCloned($package);
+        $manifestFile = $package->manifestPath();
         $versions = [];
 
         $tagsResult = Process::path($repoPath)->run('git tag');
@@ -29,15 +27,15 @@ class GitPackageFetcher implements PackageFetcher
         $tags = array_filter(explode("\n", trim($tagsResult->output())));
 
         foreach ($tags as $tagName) {
-            $composerJson = $this->readComposerJson($repoPath, $tagName);
+            $resolved = $this->resolveTagVersion($package, $tagName);
 
-            if ($composerJson === null) {
+            if ($resolved === null) {
                 continue;
             }
 
-            try {
-                $normalized = $this->versionParser->normalize($tagName);
-            } catch (\UnexpectedValueException) {
+            $manifest = $this->readManifest($repoPath, $tagName, $manifestFile);
+
+            if ($manifest === null) {
                 continue;
             }
 
@@ -47,20 +45,47 @@ class GitPackageFetcher implements PackageFetcher
             }
 
             $versions[] = [
-                'version' => $tagName,
-                'version_normalized' => $normalized,
+                ...$resolved,
                 'reference' => $sha,
-                'composer_json' => $composerJson,
+                'manifest' => $manifest,
                 'released_at' => $this->getTagDate($repoPath, $tagName),
             ];
         }
 
-        $devVersion = $this->fetchDevVersion($repoPath);
-        if ($devVersion !== null) {
-            $versions[] = $devVersion;
+        if ($package->isComposer()) {
+            $devVersion = $this->fetchDevVersion($repoPath, $manifestFile);
+            if ($devVersion !== null) {
+                $versions[] = $devVersion;
+            }
         }
 
         return $versions;
+    }
+
+    /**
+     * The persistent clone is keyed by the package id, which an unsaved
+     * package does not have yet, so this uses a throwaway shallow clone.
+     */
+    public function fetchDefaultBranchManifest(Package $package): ?array
+    {
+        $tempPath = config('repho.git_clone_path').'/tmp-'.Str::uuid();
+
+        $parentDir = dirname($tempPath);
+        if (! is_dir($parentDir)) {
+            mkdir($parentDir, 0755, true);
+        }
+
+        try {
+            $result = Process::run($this->gitCommand($package, ['clone', '--bare', '--depth', '1', '--', $package->repository_url, $tempPath]));
+
+            if (! $result->successful()) {
+                return null;
+            }
+
+            return $this->readManifest($tempPath, 'HEAD', $package->manifestPath());
+        } finally {
+            File::deleteDirectory($tempPath);
+        }
     }
 
     public function getDistArchive(Package $package, string $reference): mixed
@@ -141,9 +166,9 @@ class GitPackageFetcher implements PackageFetcher
     /**
      * @return array<string, mixed>|null
      */
-    private function readComposerJson(string $repoPath, string $ref): ?array
+    private function readManifest(string $repoPath, string $ref, string $file): ?array
     {
-        $result = Process::path($repoPath)->run(['git', 'show', $ref.':composer.json']);
+        $result = Process::path($repoPath)->run(['git', 'show', $ref.':'.$file]);
 
         if (! $result->successful()) {
             return null;
@@ -177,9 +202,9 @@ class GitPackageFetcher implements PackageFetcher
     }
 
     /**
-     * @return array{version: string, version_normalized: string, reference: string, composer_json: array<string, mixed>, released_at: string|null}|null
+     * @return array{version: string, version_normalized: string, reference: string, manifest: array<string, mixed>, released_at: string|null}|null
      */
-    private function fetchDevVersion(string $repoPath): ?array
+    private function fetchDevVersion(string $repoPath, string $manifestFile): ?array
     {
         $result = Process::path($repoPath)->run('git symbolic-ref HEAD');
 
@@ -195,8 +220,8 @@ class GitPackageFetcher implements PackageFetcher
             return null;
         }
 
-        $composerJson = $this->readComposerJson($repoPath, 'HEAD');
-        if ($composerJson === null) {
+        $manifest = $this->readManifest($repoPath, 'HEAD', $manifestFile);
+        if ($manifest === null) {
             return null;
         }
 
@@ -204,7 +229,7 @@ class GitPackageFetcher implements PackageFetcher
             'version' => "dev-{$branch}",
             'version_normalized' => "dev-{$branch}",
             'reference' => $sha,
-            'composer_json' => $composerJson,
+            'manifest' => $manifest,
             'released_at' => null,
         ];
     }
